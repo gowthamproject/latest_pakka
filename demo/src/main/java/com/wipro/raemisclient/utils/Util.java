@@ -41,8 +41,12 @@ public class Util {
 		for (MGWControlFlowStats flowStats : ctrlFlowStatList) {
 			if (flowStats.getMeasurement_period() < 1000)
 				continue;
-			totat_Throughput += ((flowStats.getEgress_octet_count() * 8) / (flowStats.getMeasurement_period() / 1000))
-					/ 1000;
+			
+			int bit = 8;
+			int d= flowStats.getEgress_octet_count();
+			int flowOctVal = Math.abs(d *  bit);
+			double mes = flowStats.getMeasurement_period() / 1000;
+			totat_Throughput += ( flowOctVal / mes)/ 1000;
 		}
 		return totat_Throughput;
 	}

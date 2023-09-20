@@ -2,6 +2,7 @@ package com.wipro.raemisclient.services;
 
 import com.wipro.raemisclient.certificate.Certificate;
 import com.wipro.raemisclient.common.Constants;
+import com.wipro.raemisclient.common.Core5GDetails;
 import com.wipro.raemisclient.dao.SubscriberFlowStatsDAO;
 import com.wipro.raemisclient.model.MGWControlFlowStats;
 import com.wipro.raemisclient.model.Throughput;
@@ -38,8 +39,7 @@ public class SubscriberFlowStatsService extends RaemisService {
                      throughputObj.setDownlink(throughput);
             }
         }
-
-        throughputObj.setNmsId(Constants.NMS_ID);
+        throughputObj.setNmsId(Core5GDetails._5G_CORE_ID);
         throughputObj.setParentId("");
         throughputObj.setDatetime(new Timestamp(new Date().getTime()));
         throughputs.add(throughputObj);
