@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ThroughputIntf {
 
-    public String get5GCtrlFlowStats(String throughput_url, String type, String dir) throws IOException;
-    public List<Throughput> calculateThroughput(List<MGWControlFlowStats> ctrlFlowStatList);
+	public String get5GCtrlFlowStats(String throughput_url, String type, String dir) throws IOException;
+
+	public List<Throughput> calculateThroughput(List<MGWControlFlowStats> ctrlFlowStatList);
 }

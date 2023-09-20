@@ -4,65 +4,73 @@ import com.wipro.raemisclient.common.Core5GDetails;
 import com.wipro.raemisclient.model.NetDevice;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Map;
 
 public class NetDeviceDAO implements DAOInterface<NetDevice> {
 
-    private static final String DELETE_ALL_NETDEVICE_QUERY = "DELETE FROM netdevice";
-    private static final String INSERT_NETDEVICE_QUERY = "INSERT INTO netdevice VALUES";
-    private static final String VIEW_NETDEVICE_QUERY = "SELECT * FROM netdevice";
-    private static Connection connection = null;
+	private static final String INSERT_NETDEVICE_QUERY = "INSERT INTO netdevice VALUES";
+	private static Connection connection = null;
 
-    public NetDeviceDAO() {
-        connection = DAOConnection.create_connection();
-    }
+	public NetDeviceDAO() {
+		connection = DAOConnection.create_connection();
+	}
 
-    public void showAllRecords() throws SQLException {
-        ResultSet resultSet;
-        try (Statement statement = connection.createStatement()) {
-            resultSet = statement.executeQuery(VIEW_NETDEVICE_QUERY);
-            while (resultSet.next()) {
-                // System.out.println(resultSet.getString(2) + " " + resultSet.getString(3));
-            }
-        } catch (SQLException e) {
-            connection.close();
-            System.out.println("Connection Closed while fetching netdevice records");
-        }
-    }
+	@Override
+	public void insertRecords(List<NetDevice> listOfData) throws SQLException {
+		for (NetDevice data : listOfData) {
+			insertRecord(data);
+		}
+	}
 
-    public void insertRecords(List<NetDevice> listOfData) throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-            for (NetDevice data : listOfData) {
-                String queryParam = "(" + data.getId() + ", '" + data.getMac() +
-                        "', '" + data.getDevice() + "', '" + data.getParent_device() + "'," +
-                        " " + data.getVlan_id() + ", '" + data.getIp() + "', '" + data.getNetmask() + "'," +
-                        " '" + data.getIpv6() + "', " + data.getNat_enabled() + "," +
-                        " '" + data.getOwner() + "', " + data.getDevice_type() + ", '" + Core5GDetails._5G_CORE_ID + "')";
+	@Override
+	public void insertRecord(NetDevice data) throws SQLException {
+		try (Statement statement = connection.createStatement()) {
 
-                int res = statement.executeUpdate(INSERT_NETDEVICE_QUERY + queryParam);
-                if (res != 0) {
-                    //System.out.println("netdevice ----:" + data.getId() + " successfully polled.!");
-                }
-            }
-        } catch (SQLException e) {
-            connection.close();
-            System.out.println("Connection Closed while inserting gnb records");
-        }
-    }
+			String queryParam = "(" + data.getId() + ", '" + data.getMac() + "', '" + data.getDevice() + "', '"
+					+ data.getParent_device() + "'," + " " + data.getVlan_id() + ", '" + data.getIp() + "', '"
+					+ data.getNetmask() + "'," + " '" + data.getIpv6() + "', " + data.getNat_enabled() + "," + " '"
+					+ data.getOwner() + "', " + data.getDevice_type() + ", '" + Core5GDetails._5G_CORE_ID + "')";
 
-    public void deleteRecords() throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(DELETE_ALL_NETDEVICE_QUERY);
-        } catch (SQLException e) {
-            connection.close();
-            System.out.println("Connection Closed while deleting gnb records");
-        }
-    }
+			int res = statement.executeUpdate(INSERT_NETDEVICE_QUERY + queryParam);
+			if (res != 0) {
+				// System.out.println("netdevice ----:" + data.getId() + " successfully
+				// polled.!");
+			}
 
-    public void pollRecords(List<NetDevice> listOfData) throws SQLException, InterruptedException {
-        insertRecords(listOfData);
-    }
+		} catch (SQLException e) {
+			connection.close();
+			System.out.println("Connection Closed while inserting gnb records");
+		}
+	}
+
+	@Override
+	public void updateRecord(NetDevice data) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public List<NetDevice> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void deleteRecords(List<String> params) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateOrInsertRecords(List<NetDevice> listOfData) throws SQLException {
+		insertRecords(listOfData);
+	}
+
+	@Override
+	public void pollRecords(List<NetDevice> listOfData) throws SQLException, InterruptedException {
+		updateOrInsertRecords(listOfData);
+	}
 }

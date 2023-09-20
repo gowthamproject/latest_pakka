@@ -10,11 +10,13 @@ import java.util.List;
 
 public class GNBService extends RaemisService {
 
-    public void pull_GNBDetailsFromRaemisAPI() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void pull_GNBDetailsFromRaemisAPI() throws Exception {
 
-        Certificate.doTrustToCertificates();
-        String responseJson = super.pullData(Constants.GNB_URL);
-        //System.out.println("GNB RESPONSE ----: " + responseJson);
-        new GNBDAO().pollRecords((List<GNB>) Util.parseJsonStrToObject(responseJson, Constants.GNB));
-    }
+		Certificate.doTrustToCertificates();
+		String responseJson = super.pullData(Constants.GNB_URL);
+		// System.out.println("GNB RESPONSE ----: " + responseJson);
+		if (responseJson != null && !responseJson.isEmpty())
+			new GNBDAO().pollRecords((List<GNB>) Util.parseJsonStrToObject(responseJson, Constants.GNB));
+	}
 }

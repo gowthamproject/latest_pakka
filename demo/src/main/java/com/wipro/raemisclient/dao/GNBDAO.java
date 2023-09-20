@@ -2,10 +2,10 @@ package com.wipro.raemisclient.dao;
 
 import com.wipro.raemisclient.common.Core5GDetails;
 import com.wipro.raemisclient.model.GNB;
+import com.wipro.raemisclient.utils.Util;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,50 +25,11 @@ public class GNBDAO implements DAOInterface<GNB> {
 	}
 
 	@Override
-	public void showAllRecords() throws SQLException {
-		ResultSet resultSet;
-		try (Statement statement = connection.createStatement()) {
-			resultSet = statement.executeQuery(VIEW_GNB_QUERY);
-			while (resultSet.next()) {
-				// System.out.println(resultSet.getString(2) + " " + resultSet.getString(3));
-			}
-		} catch (SQLException e) {
-			connection.close();
-			System.out.println("Connection Closed while fetching gnb records");
-		}
-	}
-
-	public boolean isRecordExist(String param) throws SQLException {
-
-		try (Statement statement = connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery(VIEW_GNB_QUERY + " where name='" + param + "'");
-			if (resultSet != null)
-				return true;
-		} catch (SQLException e) {
-			connection.close();
-			System.out.println("Connection Closed while fetching gnb records");
-		}
-		return false;
-	}
-
 	public List<GNB> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 		List<GNB> gnbs = new ArrayList<GNB>();
 		try (Statement statement = connection.createStatement()) {
-			StringBuffer sb = new StringBuffer(" where ");
-			int mapSize = paramMap.size();
-			int i = 1;
-			for (String param : paramMap.keySet()) {
-				Object obj = paramMap.get(param);
-				if (obj instanceof String)
-					sb.append(param).append("=").append("'" + paramMap.get(param) + "'");
-				else if (obj instanceof Integer)
-					sb.append(param).append("=").append(paramMap.get(param));
-				if (i < mapSize) {
-					sb.append(" and ");
-				}
-				i++;
-			}
-			ResultSet resultSet = statement.executeQuery(VIEW_GNB_QUERY + sb);
+			String param = Util.parseAndGetSqlParam(paramMap);
+			ResultSet resultSet = statement.executeQuery(VIEW_GNB_QUERY + param);
 
 			while (resultSet.next()) {
 				GNB gnb = new GNB();
@@ -86,30 +47,32 @@ public class GNBDAO implements DAOInterface<GNB> {
 
 	@Override
 	public void insertRecords(List<GNB> listOfData) throws SQLException {
-		try {
-			for (GNB data : listOfData) {
-				insertRecord(data);
+		for (GNB data : listOfData) {
+			insertRecord(data);
+		}
+	}
+
+	@Override
+	public void insertRecord(GNB data) throws SQLException {
+		try (Statement statement = connection.createStatement()) {
+			String status = data.getOper_state().equals("1") ? "Disconnected" : "Connected";
+			String queryParam = "('" + data.getName() + "', '" + data.getPlmn_id() + "', " + data.getGnb_id() + ", "
+					+ data.getTac() + "," + " '" + data.getSctp_address() + "', '" + status + "','"
+					+ Core5GDetails._5G_CORE_ID + "')";
+
+			int res = statement.executeUpdate(INSERT_GNB_QUERY + queryParam);
+			if (res != 0) {
+				// System.out.println("gnb id ----:" + data.getGnb_id() + " successfully
+				// polled.!");
 			}
 		} catch (SQLException e) {
 			connection.close();
 			System.out.println("Connection Closed while inserting gnb records");
 		}
+
 	}
 
-	public void insertRecord(GNB data) throws SQLException {
-		Statement statement = connection.createStatement();
-		String status = data.getOper_state().equals("1") ? "Disconnected" : "Connected";
-		String queryParam = "('" + data.getName() + "', '" + data.getPlmn_id() + "', " + data.getGnb_id() + ", "
-				+ data.getTac() + "," + " '" + data.getSctp_address() + "', '" + status + "','"
-				+ Core5GDetails._5G_CORE_ID + "')";
-
-		int res = statement.executeUpdate(INSERT_GNB_QUERY + queryParam);
-		if (res != 0) {
-			// System.out.println("gnb id ----:" + data.getGnb_id() + " successfully
-			// polled.!");
-		}
-	}
-
+	@Override
 	public void updateRecord(GNB data) throws SQLException {
 		{
 			try {
@@ -132,10 +95,6 @@ public class GNBDAO implements DAOInterface<GNB> {
 	}
 
 	@Override
-	public void deleteRecords() throws SQLException {
-
-	}
-
 	public void deleteRecords(List<String> params) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			for (String param : params) {
@@ -146,10 +105,11 @@ public class GNBDAO implements DAOInterface<GNB> {
 		}
 	}
 
-	private void updateOrInsertRecords(List<GNB> listOfData) throws SQLException {
-		if(listOfData == null || listOfData.isEmpty())
+	@Override
+	public void updateOrInsertRecords(List<GNB> listOfData) throws SQLException {
+		if (listOfData == null || listOfData.isEmpty())
 			return;
-		
+
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("core_id", Core5GDetails._5G_CORE_ID);
 		List<GNB> existingGNBs = getRecordByParam(paramMap);
@@ -168,9 +128,9 @@ public class GNBDAO implements DAOInterface<GNB> {
 			List<GNB> insertGNBs = listOfData.stream().filter(i -> !existingGNBNames.contains(i.getName()))
 					.collect(Collectors.toList());
 			insertRecords(insertGNBs);
-			
+
 			for (GNB curr_gnb : listOfData) {
-				for (GNB ext_gnb : existingGNBs) {					
+				for (GNB ext_gnb : existingGNBs) {
 					if (curr_gnb.getName().equals(ext_gnb.getName())) {
 						String status = curr_gnb.getOper_state().equals("1") ? "Disconnected" : "Connected";
 						if (!status.equals(ext_gnb.getOper_state()))

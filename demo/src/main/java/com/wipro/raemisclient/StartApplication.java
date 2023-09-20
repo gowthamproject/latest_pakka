@@ -7,7 +7,6 @@ import com.wipro.raemisclient.poll.PDUSessionPolling;
 import com.wipro.raemisclient.poll.SubscriberPolling;
 import com.wipro.raemisclient.poll.SubscriberThroughputPolling;
 import com.wipro.raemisclient.poll.SystemInfoPolling;
-import com.wipro.raemisclient.services.GNBService;
 import com.wipro.raemisclient.session.HTTPSessionManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

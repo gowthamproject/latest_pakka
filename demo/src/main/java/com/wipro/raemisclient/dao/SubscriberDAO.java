@@ -22,14 +22,25 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 	}
 
 	@Override
-	public void showAllRecords() throws SQLException {
-
+	public void insertRecords(List<Subscriber> listOfData) throws SQLException {
+		for (Subscriber data : listOfData) {
+			insertRecord(data);
+		}
 	}
 
-	public void insertRecords(List<Subscriber> listOfData) throws SQLException {
-		try {
-			for (Subscriber data : listOfData) {
-				insertRecord(data);
+	@Override
+	public void insertRecord(Subscriber data) throws SQLException {
+		try (Statement statement = connection.createStatement()) {
+			String queryParam = "(" + data.getId() + ", '" + data.getImsi() + "', '" + data.getTmsi() + "', '"
+					+ data.getPtmsi() + "'," + " '" + data.getImei() + "', '" + data.getMsisdn() + "', '"
+					+ data.getSip_client_attachment() + "'," + " '" + data.getMno_attachment() + "', '"
+					+ data.getLocal_ps_attachment() + "'," + " '" + data.getMno_ps_attachment() + "', '"
+					+ data.getDomain() + "', '" + data.getName() + "' , '" + Core5GDetails._5G_CORE_ID + "')";
+
+			int res = statement.executeUpdate(INSERT_SUBSCRIBER_QUERY + queryParam);
+			if (res != 0) {
+				// System.out.println("subscriber ----:" + data.getId() + " successfully
+				// polled.!");
 			}
 		} catch (SQLException e) {
 			connection.close();
@@ -37,21 +48,7 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 		}
 	}
 
-	public void insertRecord(Subscriber data) throws SQLException {
-		Statement statement = connection.createStatement();
-		String queryParam = "(" + data.getId() + ", '" + data.getImsi() + "', '" + data.getTmsi() + "', '"
-				+ data.getPtmsi() + "'," + " '" + data.getImei() + "', '" + data.getMsisdn() + "', '"
-				+ data.getSip_client_attachment() + "'," + " '" + data.getMno_attachment() + "', '"
-				+ data.getLocal_ps_attachment() + "'," + " '" + data.getMno_ps_attachment() + "', '" + data.getDomain()
-				+ "', '" + data.getName() + "' , '" + Core5GDetails._5G_CORE_ID + "')";
-
-		int res = statement.executeUpdate(INSERT_SUBSCRIBER_QUERY + queryParam);
-		if (res != 0) {
-			// System.out.println("subscriber ----:" + data.getId() + " successfully
-			// polled.!");
-		}
-	}
-
+	@Override
 	public void updateRecord(Subscriber data) throws SQLException {
 		try {
 			PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_SUBSCRIBER_QUERY);
@@ -75,16 +72,8 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 		}
 	}
 
-	public void deleteRecords() throws SQLException {
-		try (Statement statement = connection.createStatement()) {
-			statement.executeUpdate(DELETE_SUBSCRIBER_QUERY);
-		} catch (SQLException e) {
-			connection.close();
-			System.out.println("Connection Closed while deleting subscriber records");
-		}
-	}
-
-	private List<Subscriber> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+	@Override
+	public List<Subscriber> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 		List<Subscriber> subscribers = new ArrayList<Subscriber>();
 		try (Statement statement = connection.createStatement()) {
 			StringBuffer sb = new StringBuffer(" where ");
@@ -117,7 +106,8 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 		return subscribers;
 	}
 
-	private void updateOrInsertRecords(List<Subscriber> listOfData) throws SQLException {
+	@Override
+	public void updateOrInsertRecords(List<Subscriber> listOfData) throws SQLException {
 
 		if (listOfData == null || listOfData.isEmpty())
 			return;
@@ -153,7 +143,8 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 		}
 	}
 
-	private void deleteRecords(List<String> params) throws SQLException {
+	@Override
+	public void deleteRecords(List<String> params) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			for (String param : params) {
 				statement.executeUpdate(DELETE_SUBSCRIBER_QUERY + "'" + param + "'");
@@ -163,6 +154,7 @@ public class SubscriberDAO implements DAOInterface<Subscriber> {
 		}
 	}
 
+	@Override
 	public void pollRecords(List<Subscriber> listOfData) throws SQLException, InterruptedException {
 		updateOrInsertRecords(listOfData);
 		System.out.println("Subscriber records are polling..");

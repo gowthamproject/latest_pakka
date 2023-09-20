@@ -10,13 +10,13 @@ import java.util.List;
 
 public class NetDeviceService extends RaemisService {
 
-    private NetDeviceDAO netDeviceDAO = new NetDeviceDAO();
+	@SuppressWarnings("unchecked")
+	public void pull_NetDeviceDetailsFromRaemisAPI() throws Exception {
 
-    public void pull_NetDeviceDetailsFromRaemisAPI() throws Exception {
-
-        Certificate.doTrustToCertificates();
-        String responseJson = super.pullData(Constants.NETDEVICE_URL);
-        //System.out.println("NETDEVICE RESPONSE ----: " + responseJson);
-        new NetDeviceDAO().pollRecords((List<NetDevice>) Util.parseJsonStrToObject(responseJson, Constants.NETDEVICE));
-    }
+		Certificate.doTrustToCertificates();
+		String responseJson = super.pullData(Constants.NETDEVICE_URL);
+		// System.out.println("NETDEVICE RESPONSE ----: " + responseJson);
+		if (responseJson != null && !responseJson.isEmpty())
+			new NetDeviceDAO().pollRecords((List<NetDevice>) Util.parseJsonStrToObject(responseJson, Constants.NETDEVICE));
+	}
 }

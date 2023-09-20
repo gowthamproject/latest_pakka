@@ -3,17 +3,19 @@ package com.wipro.raemisclient.dao;
 import com.wipro.raemisclient.common.Constants;
 import com.wipro.raemisclient.common.Core5GDetails;
 import com.wipro.raemisclient.model.Alarm;
+import com.wipro.raemisclient.utils.Util;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AlarmDAO implements DAOInterface<Alarm> {
 
-	private static final String DELETE_ALL_ALARMS_QUERY = "DELETE FROM alarmdetails";
 	private static final String INSERT_ALARMS_QUERY = "INSERT INTO alarmdetails VALUES";
-	private static final String GET_ALARM_BY_COREID_QUERY = "SELECT * FROM alarmdetails where node_id=1045173342497102197";
+	private static final String GET_ALARM_QUERY = "SELECT * FROM alarmdetails";
 	private static final String UPDATE_ALARM_QUERY = " UPDATE alarmdetails SET alarm_status=? where id=? and node_id=?";
 	private static Connection connection = null;
 
@@ -21,36 +23,7 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 		connection = DAOConnection.create_connection();
 	}
 
-	public void showAllRecords() throws SQLException {
-		ResultSet resultSet;
-		try (Statement statement = connection.createStatement()) {
-			resultSet = statement.executeQuery(GET_ALARM_BY_COREID_QUERY);
-			while (resultSet.next()) {
-				// System.out.println(resultSet.getString(2) + " " + resultSet.getString(3));
-			}
-		} catch (SQLException e) {
-			connection.close();
-			System.out.println("Connection Closed while fetching alarm records");
-		}
-	}
-
-	public List<Alarm> getAlarmRecordsByNodeID() throws SQLException {
-		List<Alarm> alarmList = new ArrayList<>();
-		try (Statement statement = connection.createStatement()) {
-			ResultSet resultSet = statement.executeQuery(GET_ALARM_BY_COREID_QUERY);
-			Alarm alarm = null;
-			while (resultSet.next()) {
-				alarm = new Alarm();
-				alarm.setId(resultSet.getInt(1));
-				alarm.setAlarmStatus(resultSet.getString(15));
-				alarmList.add(alarm);
-			}
-		} catch (SQLException e) {
-			connection.close();
-		}
-		return alarmList;
-	}
-
+	@Override
 	public void insertRecords(List<Alarm> listOfData) throws SQLException {
 		try {
 			for (Alarm data : listOfData) {
@@ -62,6 +35,7 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 		}
 	}
 
+	@Override
 	public void insertRecord(Alarm data) throws SQLException {
 		Statement statement = connection.createStatement();
 		String queryParam = "(" + data.getId() + ", '" + data.getNode_type() + "', '" + data.getNode_name() + "', '"
@@ -77,17 +51,58 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 		}
 	}
 
-	public void deleteRecords() throws SQLException {
-		try (Statement statement = connection.createStatement()) {
-			statement.executeUpdate(DELETE_ALL_ALARMS_QUERY);
-		} catch (SQLException e) {
-			connection.close();
-			e.printStackTrace();
+	@Override
+	public void updateRecord(Alarm data) throws SQLException {
+		{
+			try {
+				PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_ALARM_QUERY);
+				preparedStmt.setString(1, data.getAlarmStatus());
+				preparedStmt.setInt(2, data.getId());
+				preparedStmt.setString(3, Core5GDetails._5G_CORE_ID);
+
+				int res = preparedStmt.executeUpdate();
+				if (res != 0) {
+					// System.out.println("Alarm ----:" + data.getId() + " successfully updated.!");
+				}
+			} catch (SQLException e) {
+				connection.close();
+				System.out.println("Connection Closed while updating alarm records");
+			}
 		}
 	}
 
-	public void pollRecords(List<Alarm> listOfData) throws SQLException, InterruptedException {
-		List<Alarm> existingAlarmList = getAlarmRecordsByNodeID();
+	@Override
+	public List<Alarm> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+
+		List<Alarm> alarmList = new ArrayList<>();
+		try (Statement statement = connection.createStatement()) {
+			String param = Util.parseAndGetSqlParam(paramMap);
+			ResultSet resultSet = statement.executeQuery(GET_ALARM_QUERY + param);
+			Alarm alarm = null;
+			while (resultSet.next()) {
+				alarm = new Alarm();
+				alarm.setId(resultSet.getInt(1));
+				alarm.setAlarmStatus(resultSet.getString(15));
+				alarmList.add(alarm);
+			}
+		} catch (SQLException e) {
+			connection.close();
+		}
+		return alarmList;
+	}
+
+	@Override
+	public void deleteRecords(List<String> params) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void updateOrInsertRecords(List<Alarm> listOfData) throws SQLException {
+
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("node_id", Core5GDetails._5G_CORE_ID);
+		List<Alarm> existingAlarmList = getRecordByParam(paramMap);
 		if (existingAlarmList.isEmpty()) {
 			insertRecords(listOfData);
 		} else {
@@ -110,25 +125,11 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 				}
 			}
 		}
-		System.out.println("Alarm records are polling..");
 	}
 
-	public void updateRecord(Alarm data) throws SQLException {
-		{
-			try {
-				PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_ALARM_QUERY);
-				preparedStmt.setString(1, data.getAlarmStatus());
-				preparedStmt.setInt(2, data.getId());
-				preparedStmt.setString(3, Core5GDetails._5G_CORE_ID);
-
-				int res = preparedStmt.executeUpdate();
-				if (res != 0) {
-					// System.out.println("Alarm ----:" + data.getId() + " successfully updated.!");
-				}
-			} catch (SQLException e) {
-				connection.close();
-				System.out.println("Connection Closed while updating alarm records");
-			}
-		}
+	@Override
+	public void pollRecords(List<Alarm> listOfData) throws SQLException, InterruptedException {
+		updateOrInsertRecords(listOfData);
+		System.out.println("Alarm records are polling..");
 	}
 }

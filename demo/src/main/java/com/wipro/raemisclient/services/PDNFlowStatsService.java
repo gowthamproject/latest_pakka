@@ -14,7 +14,8 @@ import java.util.List;
 
 public class PDNFlowStatsService extends RaemisService {
 
-    public void pull_ThroughputFromRaemisAPI() throws Exception {
+    @SuppressWarnings("unchecked")
+	public void pull_ThroughputFromRaemisAPI() throws Exception {
 
         Certificate.doTrustToCertificates();
         String throughput_5g_Json;

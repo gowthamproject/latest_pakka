@@ -9,10 +9,12 @@ import com.wipro.raemisclient.utils.Util;
 import java.util.List;
 
 public class AlarmService extends RaemisService {
-    public void pull_AlarmDetailsFromRaemisAPI() throws Exception {
+	@SuppressWarnings("unchecked")
+	public void pull_AlarmDetailsFromRaemisAPI() throws Exception {
 
-        Certificate.doTrustToCertificates();
-        String responseJson = super.pullData(Constants.ALARM_URL);
-        new AlarmDAO().pollRecords((List<Alarm>) Util.parseJsonStrToObject(responseJson, Constants.ALARM));
-    }
+		Certificate.doTrustToCertificates();
+		String responseJson = super.pullData(Constants.ALARM_URL);
+		if (responseJson != null && !responseJson.isEmpty())
+			new AlarmDAO().pollRecords((List<Alarm>) Util.parseJsonStrToObject(responseJson, Constants.ALARM));
+	}
 }

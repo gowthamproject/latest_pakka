@@ -10,10 +10,12 @@ import java.util.List;
 
 public class SubscriberService extends RaemisService {
 
-    public void pull_SubsriberDetailsFromRaemisAPI() throws Exception {
-        Certificate.doTrustToCertificates();
-        String responseJson = super.pullData(Constants.SUBSCRIBER_URL);
-        //System.out.println("SUBSCRIBER RESPONSE ----: " + responseJson);
-        new SubscriberDAO().pollRecords((List<Subscriber>) Util.parseJsonStrToObject(responseJson, Constants.SUBSCRIBER));
-    }
+	@SuppressWarnings("unchecked")
+	public void pull_SubsriberDetailsFromRaemisAPI() throws Exception {
+		Certificate.doTrustToCertificates();
+		String responseJson = super.pullData(Constants.SUBSCRIBER_URL);
+		// System.out.println("SUBSCRIBER RESPONSE ----: " + responseJson);
+		if (responseJson != null && !responseJson.isEmpty())
+			new SubscriberDAO().pollRecords((List<Subscriber>) Util.parseJsonStrToObject(responseJson, Constants.SUBSCRIBER));
+	}
 }

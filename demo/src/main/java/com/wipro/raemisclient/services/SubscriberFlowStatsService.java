@@ -16,7 +16,8 @@ import java.util.List;
 public class SubscriberFlowStatsService extends RaemisService {
 
 
-    public void pull_ThroughputFromRaemisAPI() throws Exception {
+    @SuppressWarnings("unchecked")
+	public void pull_ThroughputFromRaemisAPI() throws Exception {
 
         Certificate.doTrustToCertificates();
         String throughput_5g_Json;
@@ -24,16 +25,18 @@ public class SubscriberFlowStatsService extends RaemisService {
         Throughput throughputObj = new Throughput();
         for (String dir : Constants.DIRECTION) {
             throughput_5g_Json = get5GCtrlFlowStats(Constants.MGW_CTRL_FLOW_STATS_URL, Constants._5G, dir);
-            List<MGWControlFlowStats> listOf5GCtrlFlow = (List<MGWControlFlowStats>) Util.parseJsonStrToObject(throughput_5g_Json, Constants.THROUGHPUT);
-            /*listOf5GCtrlFlow.forEach(p -> {
-                System.out.println("THROUGHPUT RESPONSE SUBSCRIBER----: " + p.toString());
-            });*/
-            int throughput = Util.calculateThroughput(listOf5GCtrlFlow);
+            if (throughput_5g_Json != null && !throughput_5g_Json.isEmpty()) {
+            	 List<MGWControlFlowStats> listOf5GCtrlFlow = (List<MGWControlFlowStats>) Util.parseJsonStrToObject(throughput_5g_Json, Constants.THROUGHPUT);
+                 /*listOf5GCtrlFlow.forEach(p -> {
+                     System.out.println("THROUGHPUT RESPONSE SUBSCRIBER----: " + p.toString());
+                 });*/
+                 int throughput = Util.calculateThroughput(listOf5GCtrlFlow);
 
-            if (dir.equals(Constants.UP_LINK))
-                throughputObj.setUplink(throughput);
-            else
-                throughputObj.setDownlink(throughput);
+                 if (dir.equals(Constants.UP_LINK))
+                     throughputObj.setUplink(throughput);
+                 else
+                     throughputObj.setDownlink(throughput);
+            }
         }
 
         throughputObj.setNmsId(Constants.NMS_ID);
