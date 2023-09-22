@@ -7,4 +7,6 @@ public class AlarmDetailsData {
             "'internal_id':3, 'acknowleded':0}, {'id' : 3, 'start_time':'2023-03-22 12:22:11', 'severity':'warning', 'obj_class':'test class 2'," +
             "'obj_id':'testid 2', 'alarm_identifier':'', 'event_type':'', 'probable_cause':'raemis', 'specific_problem':'', 'add_text':'warning data'," +
             "'internal_id':5, 'acknowledge':1}]";
+    
+
 }

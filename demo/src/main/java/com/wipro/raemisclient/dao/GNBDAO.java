@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 public class GNBDAO implements DAOInterface<GNB> {
 	private static final String INSERT_GNB_QUERY = "INSERT INTO gnb VALUES";
 	private static final String VIEW_GNB_QUERY = "SELECT * FROM gnb";
-	private static final String UPDATE_GNB_QUERY = "UPDATE gnb SET plmn_id=?, gnb_id=?, tac=?, status=? where name=?";
+	private static final String UPDATE_GNB_QUERY = "UPDATE gnb SET plmn_id=?, name=?, tac=?, status=? where gnb_id=?";
 	private static final String DELETE_GNB_QUERY = "DELETE from gnb where core_id = '" + Core5GDetails._5G_CORE_ID
-			+ "' and name=";
+			+ "' and gnb_id=";
 
 	private static Connection connection = null;
 
@@ -79,10 +79,10 @@ public class GNBDAO implements DAOInterface<GNB> {
 				String status = data.getOper_state().equals("1") ? "Disconnected" : "Connected";
 				PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_GNB_QUERY);
 				preparedStmt.setString(1, data.getPlmn_id());
-				preparedStmt.setInt(2, data.getGnb_id());
+				preparedStmt.setString(2, data.getName());
 				preparedStmt.setInt(3, data.getTac());
 				preparedStmt.setString(4, status);
-				preparedStmt.setString(5, data.getName());
+				preparedStmt.setInt(5, data.getGnb_id());
 				int res = preparedStmt.executeUpdate();
 				if (res != 0) {
 					// System.out.println("gnb ----:" + data.getName() + " successfully updated.!");
@@ -98,7 +98,17 @@ public class GNBDAO implements DAOInterface<GNB> {
 	public void deleteRecords(List<String> params) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			for (String param : params) {
-				statement.executeUpdate(DELETE_GNB_QUERY + "'" + param + "'");
+				statement.executeUpdate(DELETE_GNB_QUERY + param );
+			}
+		} catch (SQLException e) {
+			connection.close();
+		}
+	}
+	
+	public void deleteRecordss(List<Integer> params) throws SQLException {
+		try (Statement statement = connection.createStatement()) {
+			for (Integer param : params) {
+				statement.executeUpdate(DELETE_GNB_QUERY + param );
 			}
 		} catch (SQLException e) {
 			connection.close();
@@ -118,20 +128,20 @@ public class GNBDAO implements DAOInterface<GNB> {
 			insertRecords(listOfData);
 		} else {
 
-			List<String> existingGNBNames = existingGNBs.stream().map(gnb -> gnb.getName())
+			List<Integer> existingGNBIds = existingGNBs.stream().map(gnb -> gnb.getGnb_id())
 					.collect(Collectors.toList());
-			List<String> currentGNBNames = listOfData.stream().map(gnb -> gnb.getName()).collect(Collectors.toList());
+			List<Integer> currentGNBIds = listOfData.stream().map(gnb -> gnb.getGnb_id()).collect(Collectors.toList());
 
-			List<String> deleteGNBs = existingGNBNames.stream().filter(i -> !currentGNBNames.contains(i))
+			List<Integer> deleteGNBs = existingGNBIds.stream().filter(i -> !currentGNBIds.contains(i))
 					.collect(Collectors.toList());
-			deleteRecords(deleteGNBs);
-			List<GNB> insertGNBs = listOfData.stream().filter(i -> !existingGNBNames.contains(i.getName()))
+			deleteRecordss(deleteGNBs);
+			List<GNB> insertGNBs = listOfData.stream().filter(i -> !existingGNBIds.contains(i.getGnb_id()))
 					.collect(Collectors.toList());
 			insertRecords(insertGNBs);
 
 			for (GNB curr_gnb : listOfData) {
 				for (GNB ext_gnb : existingGNBs) {
-					if (curr_gnb.getName().equals(ext_gnb.getName())) {
+					if (curr_gnb.getGnb_id() == ext_gnb.getGnb_id()) {
 						String status = curr_gnb.getOper_state().equals("1") ? "Disconnected" : "Connected";
 						if (!status.equals(ext_gnb.getOper_state()))
 							updateRecord(curr_gnb);
@@ -145,9 +155,5 @@ public class GNBDAO implements DAOInterface<GNB> {
 	public void pollRecords(List<GNB> listOfData) throws SQLException, InterruptedException {
 		updateOrInsertRecords(listOfData);
 		System.out.println("gNB records are polling..");
-	}
-
-	public static void main(String[] args) throws SQLException, InterruptedException {
-		new GNBDAO().pollRecords(null);
 	}
 }
