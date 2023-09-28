@@ -17,6 +17,9 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	private static final String INSERT_ALARMS_QUERY = "INSERT INTO alarmdetails VALUES";
 	private static final String GET_ALARM_QUERY = "SELECT * FROM alarmdetails";
 	private static final String UPDATE_ALARM_QUERY = " UPDATE alarmdetails SET alarm_status=? where id=? and node_id=?";
+	private static final String UPDATE_CLOSED_ALARM_QUERY = " UPDATE alarmdetails SET alarm_status=?, start_time=?, severity=?, objclass=?, objid=?, "
+			+ "eventtype=?, probablecause=?, specificproblem=?, addtext=?, internalid=?, acknowledged=? where id=? and node_id=?";
+
 	private static Connection connection = null;
 
 	public AlarmDAO() {
@@ -59,6 +62,38 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 				preparedStmt.setString(1, data.getAlarmStatus());
 				preparedStmt.setInt(2, data.getId());
 				preparedStmt.setString(3, Core5GDetails._5G_CORE_ID);
+
+				int res = preparedStmt.executeUpdate();
+				if (res != 0) {
+					// System.out.println("Alarm ----:" + data.getId() + " successfully updated.!");
+				}
+			} catch (SQLException e) {
+				connection.close();
+				System.out.println("Connection Closed while updating alarm records");
+			}
+		}
+	}
+	
+	public void updateClosedRecord(Alarm data) throws SQLException {
+		{
+			final String UPDATE_CLOSED_ALARM_QUERYY = " UPDATE alarmdetails SET alarm_status=?, start_time=?, severity=?, objclass=?, objid=?, "
+					+ "eventtype=?, probablecause=?, specificproblem=?, addtext=?, internalid=?, acknowledged=? where id=? and node_id=?";
+
+			try {
+				PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_CLOSED_ALARM_QUERY);
+				preparedStmt.setString(1, data.getAlarmStatus());
+				preparedStmt.setString(2, data.getStart_time());
+				preparedStmt.setString(3, data.getSeverity());
+				preparedStmt.setString(4, data.getObj_class());
+				preparedStmt.setString(5, data.getObj_id());
+				preparedStmt.setString(6, data.getEvent_type());
+				preparedStmt.setString(7, data.getProbable_cause());
+				preparedStmt.setString(8, data.getSpecific_problem());
+				preparedStmt.setString(9, data.getAdd_text());
+				preparedStmt.setInt(10, data.getInternal_id());
+				preparedStmt.setInt(11, data.getAcknowledge());
+				preparedStmt.setInt(12, data.getId());
+				preparedStmt.setString(13, Core5GDetails._5G_CORE_ID);
 
 				int res = preparedStmt.executeUpdate();
 				if (res != 0) {
@@ -115,13 +150,18 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 			}
 			for (Alarm alarm : existingAlarmList) {
 				long count = listOfData.stream().filter(al -> al.getId() == alarm.getId()).count();
-				if (count == 0) {
+				List<Alarm> updateClosedAlarm = listOfData.stream().filter(al -> al.getId() == alarm.getId()).collect(Collectors.toList());
+
+				if (updateClosedAlarm == null || updateClosedAlarm.isEmpty()) {
 					if (alarm.getAlarmStatus().equals(Constants.ALARM_STATUS[0]))
 						continue;
 					Alarm alarm1 = new Alarm();
 					alarm1.setId(alarm.getId());
 					alarm1.setAlarmStatus(Constants.ALARM_STATUS[0]);
 					updateRecord(alarm1);
+				} else {
+					updateClosedAlarm.get(0).setAlarmStatus(Constants.ALARM_STATUS[1]);
+					updateRecord(updateClosedAlarm.get(0));
 				}
 			}
 		}
