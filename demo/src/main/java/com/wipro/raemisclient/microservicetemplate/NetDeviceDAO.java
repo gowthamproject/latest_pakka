@@ -1,7 +1,4 @@
-package com.wipro.raemisclient.dao;
-
-import com.wipro.raemisclient.common.Core5GDetails;
-import com.wipro.raemisclient.model.NetDevice;
+package com.wipro.raemisclient.microservicetemplate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,7 +6,10 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-public class NetDeviceDAO implements DAOInterface<NetDevice> {
+import com.wipro.raemisclient.common.Core5GDetails;
+import com.wipro.raemisclient.model.response.NetDeviceResponse;
+
+public class NetDeviceDAO implements DAOInterface<NetDeviceResponse> {
 
 	private static final String INSERT_NETDEVICE_QUERY = "INSERT INTO netdevice VALUES";
 	private static Connection connection = null;
@@ -19,14 +19,14 @@ public class NetDeviceDAO implements DAOInterface<NetDevice> {
 	}
 
 	@Override
-	public void insertRecords(List<NetDevice> listOfData) throws SQLException {
-		for (NetDevice data : listOfData) {
+	public void insertRecords(List<NetDeviceResponse> listOfData) throws SQLException {
+		for (NetDeviceResponse data : listOfData) {
 			insertRecord(data);
 		}
 	}
 
 	@Override
-	public void insertRecord(NetDevice data) throws SQLException {
+	public void insertRecord(NetDeviceResponse data) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 
 			String queryParam = "(" + data.getId() + ", '" + data.getMac() + "', '" + data.getDevice() + "', '"
@@ -47,13 +47,13 @@ public class NetDeviceDAO implements DAOInterface<NetDevice> {
 	}
 
 	@Override
-	public void updateRecord(NetDevice data) throws SQLException {
+	public void updateRecord(NetDeviceResponse data) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public List<NetDevice> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+	public List<NetDeviceResponse> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -65,12 +65,12 @@ public class NetDeviceDAO implements DAOInterface<NetDevice> {
 	}
 
 	@Override
-	public void updateOrInsertRecords(List<NetDevice> listOfData) throws SQLException {
+	public void updateOrInsertRecords(List<NetDeviceResponse> listOfData) throws SQLException {
 		insertRecords(listOfData);
 	}
 
 	@Override
-	public void pollRecords(List<NetDevice> listOfData) throws SQLException, InterruptedException {
+	public void pollRecords(List<NetDeviceResponse> listOfData) throws SQLException, InterruptedException {
 		updateOrInsertRecords(listOfData);
 	}
 }

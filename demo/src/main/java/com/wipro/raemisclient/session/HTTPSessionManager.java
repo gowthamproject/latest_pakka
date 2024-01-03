@@ -1,21 +1,24 @@
 package com.wipro.raemisclient.session;
 
-import com.microsoft.sqlserver.jdbc.StringUtils;
-import com.wipro.raemisclient.certificate.Certificate;
-import com.wipro.raemisclient.common.Constants;
-
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.wipro.raemisclient.certificate.Certificate;
+import com.wipro.raemisclient.common.Constants;
 
 
 public class HTTPSessionManager {
 
-    public static String COOKIE = StringUtils.EMPTY;
+    public static String COOKIE = "";
 
     public static void createSession() {
         try {

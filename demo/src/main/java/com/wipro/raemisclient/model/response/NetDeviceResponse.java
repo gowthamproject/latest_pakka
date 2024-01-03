@@ -1,6 +1,6 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
-public class NetDevice {
+public class NetDeviceResponse {
 
     private int id;
     private String mac;

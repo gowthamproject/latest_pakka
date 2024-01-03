@@ -1,6 +1,4 @@
-package com.wipro.raemisclient.dao;
-
-import com.wipro.raemisclient.model.Throughput;
+package com.wipro.raemisclient.microservicetemplate;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,7 +6,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
-public class PDNFlowStatsDAO implements DAOInterface<Throughput> {
+import com.wipro.raemisclient.model.response.ThroughputResponse;
+
+public class PDNFlowStatsDAO implements DAOInterface<ThroughputResponse> {
 
 	private static final String INSERT_PDN_THROUGHPUT_QUERY = "INSERT INTO pdn_5g_throughput VALUES";
 	private static Connection connection = null;
@@ -18,14 +18,14 @@ public class PDNFlowStatsDAO implements DAOInterface<Throughput> {
 	}
 
 	@Override
-	public void insertRecords(List<Throughput> listOfData) throws SQLException {
-		for (Throughput data : listOfData) {
+	public void insertRecords(List<ThroughputResponse> listOfData) throws SQLException {
+		for (ThroughputResponse data : listOfData) {
 			insertRecord(data);
 		}
 	}
 
 	@Override
-	public void insertRecord(Throughput data) throws SQLException {
+	public void insertRecord(ThroughputResponse data) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			String queryParam = "('" + data.getNmsId() + "', '" + data.getParentId() + "', '" + data.getDatetime()
 					+ "'," + " '" + data.getUplink() + "', '" + data.getDownlink() + "')";
@@ -41,24 +41,24 @@ public class PDNFlowStatsDAO implements DAOInterface<Throughput> {
 	}
 
 	@Override
-	public void updateOrInsertRecords(List<Throughput> listOfData) throws SQLException {
+	public void updateOrInsertRecords(List<ThroughputResponse> listOfData) throws SQLException {
 		insertRecords(listOfData);
 
 	}
 
 	@Override
-	public void pollRecords(List<Throughput> listOfData) throws SQLException, InterruptedException {
+	public void pollRecords(List<ThroughputResponse> listOfData) throws SQLException, InterruptedException {
 		updateOrInsertRecords(listOfData);
 	}
 
 	@Override
-	public void updateRecord(Throughput data) throws SQLException {
+	public void updateRecord(ThroughputResponse data) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public List<Throughput> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+	public List<ThroughputResponse> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}

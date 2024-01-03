@@ -1,8 +1,8 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
 import java.util.Date;
 
-public class SystemInfo {
+public class SystemInfoResponse {
 
     private String instance;
     private String nodename;

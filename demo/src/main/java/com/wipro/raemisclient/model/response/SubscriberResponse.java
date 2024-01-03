@@ -1,6 +1,6 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
-public class Subscriber {
+public class SubscriberResponse {
 
     private int id;
     private String imsi;
@@ -114,9 +114,9 @@ public class Subscriber {
         this.name = name;
     }
 
-    public Subscriber(){}
+    public SubscriberResponse(){}
 
-    public Subscriber(int id, String imsi, String tmsi, String ptmsi, String imei, String msisdn, String sip_client_attachment, String mno_attachment, String local_ps_attachment, String mno_ps_attachment, String domain, String name) {
+    public SubscriberResponse(int id, String imsi, String tmsi, String ptmsi, String imei, String msisdn, String sip_client_attachment, String mno_attachment, String local_ps_attachment, String mno_ps_attachment, String domain, String name) {
         this.id = id;
         this.imsi = imsi;
         this.tmsi = tmsi;

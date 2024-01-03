@@ -1,6 +1,6 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
-public class MGWControlFlowStats {
+public class MGWControlFlowStatsResponse {
 
     private String aggr_value;
     private int measurement_period;

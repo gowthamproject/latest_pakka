@@ -1,18 +1,24 @@
-package com.wipro.raemisclient.dao;
+package com.wipro.raemisclient.microservicetemplate;
 
-import com.wipro.raemisclient.common.Constants;
-import com.wipro.raemisclient.common.Core5GDetails;
-import com.wipro.raemisclient.model.Alarm;
-import com.wipro.raemisclient.utils.Util;
-
-import java.sql.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;	
+import java.util.stream.Collectors;
 
-public class AlarmDAO implements DAOInterface<Alarm> {
+import com.wipro.raemisclient.apiservice.NotifyMessage;
+import com.wipro.raemisclient.common.Constants;
+import com.wipro.raemisclient.common.Core5GDetails;
+import com.wipro.raemisclient.model.response.AlarmResponse;
+import com.wipro.raemisclient.utils.Util;
+
+public class AlarmDAO implements DAOInterface<AlarmResponse> {
 
 	private static final String INSERT_ALARMS_QUERY = "INSERT INTO alarmdetails VALUES";
 	private static final String GET_ALARM_QUERY = "SELECT * FROM alarmdetails";
@@ -27,9 +33,9 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	}
 
 	@Override
-	public void insertRecords(List<Alarm> listOfData) throws SQLException {
+	public void insertRecords(List<AlarmResponse> listOfData) throws SQLException {
 		try {
-			for (Alarm data : listOfData) {
+			for (AlarmResponse data : listOfData) {
 				insertRecord(data);
 			}
 		} catch (SQLException e) {
@@ -39,7 +45,7 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	}
 
 	@Override
-	public void insertRecord(Alarm data) throws SQLException {
+	public void insertRecord(AlarmResponse data) throws SQLException {
 		Statement statement = connection.createStatement();
 		String queryParam = "(" + data.getId() + ", '" + data.getNode_type() + "', '" + data.getNode_name() + "', '"
 				+ data.getStart_time() + "', '" + data.getSeverity() + "', '" + data.getObj_class() + "'," + " '"
@@ -55,7 +61,7 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	}
 
 	@Override
-	public void updateRecord(Alarm data) throws SQLException {
+	public void updateRecord(AlarmResponse data) throws SQLException {
 		{
 			try {
 				PreparedStatement preparedStmt = connection.prepareStatement(UPDATE_ALARM_QUERY);
@@ -73,8 +79,8 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 			}
 		}
 	}
-	
-	public void updateClosedRecord(Alarm data) throws SQLException {
+
+	public void updateClosedRecord(AlarmResponse data) throws SQLException {
 		{
 			final String UPDATE_CLOSED_ALARM_QUERYY = " UPDATE alarmdetails SET alarm_status=?, start_time=?, severity=?, objclass=?, objid=?, "
 					+ "eventtype=?, probablecause=?, specificproblem=?, addtext=?, internalid=?, acknowledged=? where id=? and node_id=?";
@@ -107,15 +113,15 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	}
 
 	@Override
-	public List<Alarm> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+	public List<AlarmResponse> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 
-		List<Alarm> alarmList = new ArrayList<>();
+		List<AlarmResponse> alarmList = new ArrayList<>();
 		try (Statement statement = connection.createStatement()) {
 			String param = Util.parseAndGetSqlParam(paramMap);
 			ResultSet resultSet = statement.executeQuery(GET_ALARM_QUERY + param);
-			Alarm alarm = null;
+			AlarmResponse alarm = null;
 			while (resultSet.next()) {
-				alarm = new Alarm();
+				alarm = new AlarmResponse();
 				alarm.setId(resultSet.getInt(1));
 				alarm.setAlarmStatus(resultSet.getString(15));
 				alarmList.add(alarm);
@@ -133,42 +139,52 @@ public class AlarmDAO implements DAOInterface<Alarm> {
 	}
 
 	@Override
-	public void updateOrInsertRecords(List<Alarm> listOfData) throws SQLException {
+	public void updateOrInsertRecords(List<AlarmResponse> listOfData) throws SQLException, IOException {
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("node_id", Core5GDetails._5G_CORE_ID);
-		List<Alarm> existingAlarmList = getRecordByParam(paramMap);
+		List<AlarmResponse> existingAlarmList = getRecordByParam(paramMap);
+		boolean isDataUpdated = false;
 		if (existingAlarmList.isEmpty()) {
 			insertRecords(listOfData);
+			isDataUpdated = true;
 		} else {
-			for (Alarm pollingAlarm : listOfData) {
-				List<Alarm> matchedAlarm = existingAlarmList.stream().filter(al -> al.getId() == pollingAlarm.getId())
+			for (AlarmResponse pollingAlarm : listOfData) {
+				List<AlarmResponse> matchedAlarm = existingAlarmList.stream().filter(al -> al.getId() == pollingAlarm.getId())
 						.collect(Collectors.toList());
 				if (matchedAlarm == null || matchedAlarm.isEmpty()) {
 					insertRecord(pollingAlarm);
+					isDataUpdated = true;
 				}
 			}
-			for (Alarm alarm : existingAlarmList) {
+
+			for (AlarmResponse alarm : existingAlarmList) {
 				long count = listOfData.stream().filter(al -> al.getId() == alarm.getId()).count();
-				List<Alarm> updateClosedAlarm = listOfData.stream().filter(al -> al.getId() == alarm.getId()).collect(Collectors.toList());
+				List<AlarmResponse> updateClosedAlarm = listOfData.stream().filter(al -> al.getId() == alarm.getId())
+						.collect(Collectors.toList());
 
 				if (updateClosedAlarm == null || updateClosedAlarm.isEmpty()) {
 					if (alarm.getAlarmStatus().equals(Constants.ALARM_STATUS[0]))
 						continue;
-					Alarm alarm1 = new Alarm();
+					AlarmResponse alarm1 = new AlarmResponse();
 					alarm1.setId(alarm.getId());
 					alarm1.setAlarmStatus(Constants.ALARM_STATUS[0]);
 					updateRecord(alarm1);
+					isDataUpdated = true;
 				} else {
 					updateClosedAlarm.get(0).setAlarmStatus(Constants.ALARM_STATUS[1]);
 					updateRecord(updateClosedAlarm.get(0));
+					isDataUpdated = true;
 				}
 			}
+		}
+		if (isDataUpdated) {
+			NotifyMessage.sendMessage_Alarm();
 		}
 	}
 
 	@Override
-	public void pollRecords(List<Alarm> listOfData) throws SQLException, InterruptedException {
+	public void pollRecords(List<AlarmResponse> listOfData) throws SQLException, InterruptedException, IOException {
 		updateOrInsertRecords(listOfData);
 		System.out.println("Alarm records are polling..");
 	}

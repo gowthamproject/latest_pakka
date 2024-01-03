@@ -1,8 +1,8 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
 import com.wipro.raemisclient.common.Core5GDetails;
 
-public class PDUSession {
+public class PDUSessionResponse {
 
     private int id;
     private String gnb_id;

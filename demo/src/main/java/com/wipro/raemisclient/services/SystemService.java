@@ -2,8 +2,9 @@ package com.wipro.raemisclient.services;
 
 import com.wipro.raemisclient.certificate.Certificate;
 import com.wipro.raemisclient.common.Constants;
-import com.wipro.raemisclient.dao.SystemInfoDAO;
-import com.wipro.raemisclient.model.SystemInfo;
+import com.wipro.raemisclient.microservicetemplate.SystemInfoDAO;
+import com.wipro.raemisclient.model.response.SystemInfoResponse;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,7 +30,7 @@ public class SystemService extends PrometheusService {
         jsonResponsrMap.put(Constants.AVAILABLE_DISK_SPACE, pullDataFromInstance(Constants.AVAILABLE_DISK_SPACE_IN_GB));
 
 
-        List<SystemInfo> systemInfos = parseJson(jsonResponsrMap);
+        List<SystemInfoResponse> systemInfos = parseJson(jsonResponsrMap);
         /*systemInfos.forEach(p -> {
             System.out.println(p.toString());
         });*/
@@ -44,9 +45,9 @@ public class SystemService extends PrometheusService {
         return super.pullData(Constants.PROMETHEUS_URL, queryParam);
     }
 
-    private List<SystemInfo> parseJson(LinkedHashMap<String, String> jsonResponsrMap) throws ParseException {
-        List<SystemInfo> systemInfos = new ArrayList<>();
-        SystemInfo systemInfo = null;
+    private List<SystemInfoResponse> parseJson(LinkedHashMap<String, String> jsonResponsrMap) throws ParseException {
+        List<SystemInfoResponse> systemInfos = new ArrayList<>();
+        SystemInfoResponse systemInfo = null;
         for (String key : jsonResponsrMap.keySet()) {
             JSONParser parser = new JSONParser();
             JSONObject json = (JSONObject) parser.parse(jsonResponsrMap.get(key));
@@ -63,16 +64,16 @@ public class SystemService extends PrometheusService {
                     value = (String) valueArr.get(1);
 
                 if (key.equals(Constants.NODE_NAME_INFO)) {
-                    systemInfo = new SystemInfo();
+                    systemInfo = new SystemInfoResponse();
                     systemInfo.setInstance(instance);
                     systemInfo.setNodename(nodeName);
                     systemInfo.setPolling_date_time(new Timestamp(new Date().getTime()));
                     systemInfos.add(systemInfo);
                 } else {
                     for (int k = 0; k < systemInfos.size(); k++) {
-                        SystemInfo sysInfo = systemInfos.get(k);
+                        SystemInfoResponse sysInfo = systemInfos.get(k);
                         if (instance.equals(sysInfo.getInstance())) {
-                            SystemInfo sysInfo_new = sysInfo;
+                            SystemInfoResponse sysInfo_new = sysInfo;
                             systemInfos.remove(k);
                             if (key.equals(Constants.AVAILABLE_MEMORY_IN_GB))
                                 sysInfo_new.setAvailable_memory_in_gb(value);
@@ -95,8 +96,8 @@ public class SystemService extends PrometheusService {
         return calculateUsedDiskPercentage(systemInfos);
     }
 
-    private List<SystemInfo> calculateUsedDiskPercentage(List<SystemInfo> systemInfos){
-        for(SystemInfo sysInfo : systemInfos){
+    private List<SystemInfoResponse> calculateUsedDiskPercentage(List<SystemInfoResponse> systemInfos){
+        for(SystemInfoResponse sysInfo : systemInfos){
            double availabel_disk_space = Double.parseDouble(sysInfo.getAvailable_diskspace_in_gb());
            double total_disk_space = Double.parseDouble(sysInfo.getTotal_diskspace_in_gb());
            double used_disck_space = total_disk_space - availabel_disk_space;

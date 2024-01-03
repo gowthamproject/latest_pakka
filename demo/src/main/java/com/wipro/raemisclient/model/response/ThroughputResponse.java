@@ -1,10 +1,10 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
 import com.wipro.raemisclient.common.Core5GDetails;
 
 import java.util.Date;
 
-public class Throughput {
+public class ThroughputResponse {
 
     private String nmsId = Core5GDetails._5G_CORE_ID;
     private String parentId = null;
@@ -52,9 +52,9 @@ public class Throughput {
         this.downlink = downlink;
     }
 
-    public Throughput() {}
+    public ThroughputResponse() {}
 
-    public Throughput(String nmsId, String parentId, Date datetime, int uplink, int downlink) {
+    public ThroughputResponse(String nmsId, String parentId, Date datetime, int uplink, int downlink) {
         this.nmsId = nmsId;
         this.parentId = parentId;
         this.datetime = datetime;

@@ -4,7 +4,7 @@ import com.wipro.raemisclient.services.GNBService;
 
 import java.util.TimerTask;
 
-public class GNBPolling extends TimerTask {
+public class GNodeBPolling extends TimerTask {
 
 	@Override
 	public void run() {

@@ -1,9 +1,9 @@
-package com.wipro.raemisclient.model;
+package com.wipro.raemisclient.model.response;
 
 import com.wipro.raemisclient.common.Constants;
 import com.wipro.raemisclient.common.Core5GDetails;
 
-public class Alarm {
+public class AlarmResponse {
     private int id;
     private String node_type = Core5GDetails._5G_CORE;
     private String node_name = Core5GDetails.SYSTEM_NAME;
@@ -140,9 +140,9 @@ public class Alarm {
         this.alarmStatus = alarmStatus;
     }
 
-    public Alarm() {}
+    public AlarmResponse() {}
 
-    public Alarm(int id, String node_type, String node_name, String start_time, String severity, String obj_class, String obj_id, String alarm_identifier, String event_type, String probable_cause, String specific_problem, String add_text, int internal_id, int acknowledge, String alarmStatus) {
+    public AlarmResponse(int id, String node_type, String node_name, String start_time, String severity, String obj_class, String obj_id, String alarm_identifier, String event_type, String probable_cause, String specific_problem, String add_text, int internal_id, int acknowledge, String alarmStatus) {
         this.id = id;
         this.node_type = node_type;
         this.node_name = node_name;

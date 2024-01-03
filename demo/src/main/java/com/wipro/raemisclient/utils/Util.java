@@ -1,15 +1,25 @@
 package com.wipro.raemisclient.utils;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
-import com.wipro.raemisclient.common.Constants;
-import com.wipro.raemisclient.model.*;
-
 import java.io.StringReader;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.wipro.raemisclient.common.Constants;
+import com.wipro.raemisclient.model.response.AlarmResponse;
+import com.wipro.raemisclient.model.response.GNodeBResponse;
+import com.wipro.raemisclient.model.response.MGWControlFlowStatsResponse;
+import com.wipro.raemisclient.model.response.NetDeviceResponse;
+import com.wipro.raemisclient.model.response.PDUSessionResponse;
+import com.wipro.raemisclient.model.response.SubscriberResponse;
 
 public class Util {
 
@@ -21,32 +31,32 @@ public class Util {
 
 		switch (oper) {
 		case Constants.ALARM:
-			return Arrays.asList(new Gson().fromJson(reader, Alarm[].class));
+			return Arrays.asList(new Gson().fromJson(reader, AlarmResponse[].class));
 		case Constants.SUBSCRIBER:
-			return Arrays.asList(new Gson().fromJson(reader, Subscriber[].class));
+			return Arrays.asList(new Gson().fromJson(reader, SubscriberResponse[].class));
 		case Constants.NETDEVICE:
-			return Arrays.asList(new Gson().fromJson(reader, NetDevice[].class));
+			return Arrays.asList(new Gson().fromJson(reader, NetDeviceResponse[].class));
 		case Constants.THROUGHPUT:
-			return Arrays.asList(new Gson().fromJson(reader, MGWControlFlowStats[].class));
+			return Arrays.asList(new Gson().fromJson(reader, MGWControlFlowStatsResponse[].class));
 		case Constants.GNB:
-			return Arrays.asList(new Gson().fromJson(reader, GNB[].class));
+			return Arrays.asList(new Gson().fromJson(reader, GNodeBResponse[].class));
 		case Constants.PDU_SESSION:
-			return Arrays.asList(new Gson().fromJson(reader, PDUSession[].class));
+			return Arrays.asList(new Gson().fromJson(reader, PDUSessionResponse[].class));
 		}
 		return null;
 	}
 
-	public static int calculateThroughput(List<MGWControlFlowStats> ctrlFlowStatList) {
+	public static int calculateThroughput(List<MGWControlFlowStatsResponse> ctrlFlowStatList) {
 		int totat_Throughput = 0;
-		for (MGWControlFlowStats flowStats : ctrlFlowStatList) {
+		for (MGWControlFlowStatsResponse flowStats : ctrlFlowStatList) {
 			if (flowStats.getMeasurement_period() < 1000)
 				continue;
-			
+
 			int bit = 8;
-			int d= flowStats.getEgress_octet_count();
-			int flowOctVal = Math.abs(d *  bit);
+			int d = flowStats.getEgress_octet_count();
+			int flowOctVal = Math.abs(d * bit);
 			double mes = flowStats.getMeasurement_period() / 1000;
-			totat_Throughput += ( flowOctVal / mes)/ 1000;
+			totat_Throughput += (flowOctVal / mes) / 1000;
 		}
 		return totat_Throughput;
 	}
@@ -113,6 +123,17 @@ public class Util {
 			i++;
 		}
 		return sb.toString();
+	}
+
+	public static String convertLongListToString(List<Long> longList) {
+		StringBuilder resultBuilder = new StringBuilder();
+		for (long value : longList) {
+			resultBuilder.append(value).append(",");
+		}
+		if (resultBuilder.length() > 0) {
+			resultBuilder.setLength(resultBuilder.length() - 1);
+		}
+		return resultBuilder.toString();
 	}
 
 }

@@ -1,8 +1,6 @@
-package com.wipro.raemisclient.dao;
+package com.wipro.raemisclient.microservicetemplate;
 
-import com.wipro.raemisclient.common.Core5GDetails;
-import com.wipro.raemisclient.model.PDUSession;
-
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -11,7 +9,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class PDUSessionDAO implements DAOInterface<PDUSession> {
+import com.wipro.raemisclient.apiservice.NotifyMessage;
+import com.wipro.raemisclient.common.Core5GDetails;
+import com.wipro.raemisclient.model.response.PDUSessionResponse;
+
+public class PDUSessionDAO implements DAOInterface<PDUSessionResponse> {
 
 	private static final String INSERT_PDU_SESSION_QUERY = "INSERT INTO pdu_session VALUES";
 
@@ -22,16 +24,17 @@ public class PDUSessionDAO implements DAOInterface<PDUSession> {
 	}
 
 	@Override
-	public void insertRecords(List<PDUSession> listOfData) throws SQLException {
+	public void insertRecords(List<PDUSessionResponse> listOfData) throws SQLException, IOException {
 		final Date dateTime = new Timestamp(new Date().getTime());
-		for (PDUSession data : listOfData) {
+		for (PDUSessionResponse data : listOfData) {
 			data.setDateTime(dateTime.toString());
 			insertRecord(data);
 		}
+		NotifyMessage.sendMessage_PDUSession();
 	}
 
 	@Override
-	public void insertRecord(PDUSession data) throws SQLException {
+	public void insertRecord(PDUSessionResponse data) throws SQLException {
 		try (Statement statement = connection.createStatement()) {
 			String queryParam = "(" + data.getId() + ", '" + data.getGnb_id() + "', " + data.getRan_ue_ngap_id() + ", "
 					+ data.getSupi() + "," + " '" + data.getDateTime() + "','" + Core5GDetails._5G_CORE_ID + "')";
@@ -48,24 +51,24 @@ public class PDUSessionDAO implements DAOInterface<PDUSession> {
 	}
 
 	@Override
-	public void updateOrInsertRecords(List<PDUSession> listOfData) throws SQLException {
+	public void updateOrInsertRecords(List<PDUSessionResponse> listOfData) throws SQLException, IOException {
 		insertRecords(listOfData);
 
 	}
 
 	@Override
-	public void pollRecords(List<PDUSession> listOfData) throws SQLException, InterruptedException {
+	public void pollRecords(List<PDUSessionResponse> listOfData) throws SQLException, InterruptedException, IOException {
 		updateOrInsertRecords(listOfData);
 		System.out.println("PDU session records are polling..");
 	}
 
 	@Override
-	public void updateRecord(PDUSession data) throws SQLException {
+	public void updateRecord(PDUSessionResponse data) throws SQLException {
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public List<PDUSession> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
+	public List<PDUSessionResponse> getRecordByParam(Map<String, Object> paramMap) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
